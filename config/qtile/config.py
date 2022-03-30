@@ -1,0 +1,248 @@
+# Copyright (c) 2010 Aldo Cortesi
+# Copyright (c) 2010, 2014 dequis
+# Copyright (c) 2012 Randall Ma
+# Copyright (c) 2012-2014 Tycho Andersen
+# Copyright (c) 2012 Craig Barnes
+# Copyright (c) 2013 horsik
+# Copyright (c) 2013 Tao Sauvage
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+from typing import List  # noqa: F401
+
+from libqtile import bar, layout, widget
+from libqtile.widget import Backlight
+from libqtile.config import Click, Drag, Group, Key, Match, Screen
+from libqtile.lazy import lazy
+from libqtile.utils import guess_terminal
+import os
+
+mod = "mod4"
+#terminal = guess_terminal()
+terminal_custom = "xfce4-terminal"
+custom_run = "rofi -show run &"
+#custom_browser = "brave-browser"
+vol_up = "/usr/bin/pactl set-sink-volume 0 +5%"
+vol_down = "/usr/bin/pactl set-sink-volume 0 -5%"
+vol_toggle = "/usr/bin/pactl set-sink-mute 0 toggle"
+bright_up = "python3 .config/qtile/bright_up.py"
+bright_down = "python3 .config/qtile/bright_down.py"
+screen_shot = "xfce4-screenshooter"
+logout_custom = "arcolinux-logout"
+#lockscreen = "betterlockscreen -l dimblur --time-format %H:%M:%S --off 10"
+help_menu = """xfce4-terminal --command="python .config/qtile/help_menu.py" """
+wifi_menu = """xfce4-terminal --command="nmtui" """
+
+
+keys = [
+    # Switch between windows
+    #Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
+    #Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
+    #Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
+    #Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
+    Key([mod], "space", lazy.layout.next(),
+        desc="Move window focus to other window"),
+
+    # Move windows between left/right columns or move up/down in current stack.
+    # Moving out of range in Columns layout will create new column.
+    Key([mod, "shift"], "a", lazy.layout.shuffle_left(),
+        desc="Move window to the left"),
+    Key([mod, "shift"], "d", lazy.layout.shuffle_right(),
+        desc="Move window to the right"),
+    Key([mod, "shift"], "s", lazy.layout.shuffle_down(),
+        desc="Move window down"),
+    Key([mod, "shift"], "w", lazy.layout.shuffle_up(), desc="Move window up"),
+
+    # Grow windows. If current window is on the edge of screen and direction
+    # will be to screen edge - window would shrink.
+    Key([mod], "a", lazy.layout.grow_left(),
+        desc="Grow window to the left"),
+    Key([mod], "d", lazy.layout.grow_right(),
+        desc="Grow window to the right"),
+    Key([mod], "s", lazy.layout.grow_down(),
+        desc="Grow window down"),
+    Key([mod], "w", lazy.layout.grow_up(), desc="Grow window up"),
+    Key([mod], "z", lazy.layout.normalize(), desc="Reset all window sizes"),
+
+    # Toggle between split and unsplit sides of stack.
+    # Split = all windows displayed
+    # Unsplit = 1 window displayed, like Max layout, but still with
+    # multiple stack panes
+    Key([mod, "shift"], "Return", lazy.layout.toggle_split(),
+        desc="Toggle between split and unsplit sides of stack"),
+    Key([mod], "Return", lazy.spawn(terminal_custom), desc="Launch terminal"),
+
+    # Toggle between different layouts as defined below
+    Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
+    Key([mod], "c", lazy.window.kill(), desc="Kill focused window"),
+
+    Key([mod, "shift"], "r", lazy.restart(), desc="Restart Qtile"),
+   #Key([mod, "shift"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
+    Key([mod, "shift"], "q", lazy.spawn(logout_custom), desc="Shutdown Qtile"),
+    Key([mod], "r", lazy.spawn(custom_run), desc="Spawn a command using a prompt widget"),
+   #Key([mod], "b", lazy.spawn(custom_browser), desc="Spawn browser"),
+    Key([mod], "n", lazy.spawn(vol_up), desc="Volume Up"),
+    Key([mod], "b", lazy.spawn(vol_down), desc="Volume Down"),
+    Key([mod], "m", lazy.spawn(vol_toggle), desc="Volume Toggle"),
+    Key([mod], "l", lazy.spawn(bright_up), desc="Brightness Up"),
+    Key([mod], "k", lazy.spawn(bright_down), desc="Brightness down"),
+    Key([mod], "p", lazy.spawn(screen_shot), desc="Screenshot"),
+   # Key([mod], "q", lazy.spawn(lockscreen), desc="Lockscreen"),
+    Key(["control"], "h", lazy.spawn(help_menu), desc="Help Screen"),
+    Key([mod, "shift"], "w", lazy.spawn(wifi_menu), desc="Wifi and Network"),
+
+    Key([mod], "Left", lazy.screen.prev_group(), desc="Move Left"),
+    Key([mod], "Right", lazy.screen.next_group(), desc="Move Right")
+]
+
+groups = [Group(i) for i in "123456789"]
+
+for i in groups:
+    keys.extend([
+        # mod1 + letter of group = switch to group
+        Key([mod], i.name, lazy.group[i.name].toscreen(),
+            desc="Switch to group {}".format(i.name)),
+
+        # mod1 + shift + letter of group = switch to & move focused window to group
+        Key([mod, "shift"], i.name, lazy.window.togroup(i.name, switch_group=True),
+            desc="Switch to & move focused window to group {}".format(i.name)),
+        # Or, use below if you prefer not to switch to that group.
+        # # mod1 + shift + letter of group = move focused window to group
+        # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
+        #     desc="move focused window to group {}".format(i.name)),
+    ])
+
+
+layouts = [
+    layout.Columns(border_width=1,
+    		   border_focus = "#cccccc",
+    		   border_normal = "#00000000"),  #border_focus_stack=['#5b5b5b', '#444444']
+    layout.Max(),
+    # layout.Floating(),
+    # Try more layouts by unleashing below layouts.
+    # layout.Stack(num_stacks=2),
+    # layout.Bsp(),
+    # layout.Matrix(),
+    # layout.MonadTall(),
+    # layout.MonadWide(),
+    # layout.RatioTile(),
+    # layout.Tile(),
+    layout.TreeTab(),
+    # layout.VerticalTile(),
+    # layout.Zoomy(),
+]
+
+widget_defaults = dict(
+    font='sans',
+    fontsize=12,
+    padding=4,
+)
+extension_defaults = widget_defaults.copy()
+
+
+#color
+bg_white = "#dedede"
+bg_black = "#121212"
+
+screens = [
+    Screen(
+        top=bar.Bar(
+            [             
+		widget.GroupBox(background = bg_white,
+				foreground = "#000000",
+				active = "#000000",
+				inactive = "#999999"),
+		widget.CurrentLayout(background = bg_white,foreground = "#000000"),   
+                widget.Prompt(),
+                widget.WindowName(background=bg_black),
+                widget.Chord(
+                    chords_colors={
+                        'launch': ("#ff0000", "#444444"),
+                    },
+                    name_transform=lambda name: name.upper(),
+                ),
+                #widget.Spacer(background=bg_black),
+                widget.TextBox("|Help: Ctrl+H|",background= bg_black ),			#c4bdb7
+                widget.Notify(action=False),
+                widget.Systray(),
+                #widget.Net(format ='{interface}:{down}\u2193\u2191{up}'),
+                widget.Volume(foreground="#000000",background= bg_white),			#c4bdb7
+                #widget.TextBox(" ",background= bg_white),
+                widget.Clock(format='%d-%m-%y %a %I:%M %p', foreground="#000000",background= bg_white),		#00e86b
+                #widget.TextBox("  Bat:",foreground="#000000",background= bg_white),		#96cff2
+                widget.Battery(foreground="#000000",            	 #96cff2
+				background= bg_white,
+                		discharge_char='',
+                		update_interval= 5,
+                		format = '{char} {percent:2.0%} {watt:.2f} W'),
+                #widget.TextBox(" ",background = bg_white),
+                #widget.CPU(foreground="#000000",background= bg_white),			#d471f5
+                widget.ThermalSensor(foreground="#000000", background = bg_white),	#d471f5
+               	#widget.TextBox(" ",background = bg_white),
+                widget.QuickExit(foreground="#ffffff",
+				 background=bg_black, 				#eeee33
+                		 default_text = ' | Logout | ',
+                		 countdown_format ='|{} seconds|'),
+            ],
+            16,
+        ),
+    ),
+]
+
+# Drag floating layouts.
+mouse = [
+    Drag([mod], "Button1", lazy.window.set_position_floating(),
+         start=lazy.window.get_position()),
+    Drag([mod], "Button3", lazy.window.set_size_floating(),
+         start=lazy.window.get_size()),
+    Click([mod], "Button2", lazy.window.bring_to_front())
+]
+
+dgroups_key_binder = None
+dgroups_app_rules = []  # type: List
+follow_mouse_focus = True
+bring_front_click = False
+cursor_warp = False
+floating_layout = layout.Floating(float_rules=[
+    # Run the utility of `xprop` to see the wm class and name of an X client.
+    *layout.Floating.default_float_rules,
+    Match(wm_class='confirmreset'),  # gitk
+    Match(wm_class='makebranch'),  # gitk
+    Match(wm_class='maketag'),  # gitk
+    Match(wm_class='ssh-askpass'),  # ssh-askpass
+    Match(title='branchdialog'),  # gitk
+    Match(title='pinentry'),  # GPG key password entry
+])
+auto_fullscreen = True
+focus_on_window_activation = "smart"
+reconfigure_screens = True
+os.system("sh .config/qtile/.startup.sh")
+# If things like steam games want to auto-minimize themselves when losing
+# focus, should we respect this or not?
+auto_minimize = True
+
+# XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
+# string besides java UI toolkits; you can see several discussions on the
+# mailing lists, GitHub issues, and other WM documentation that suggest setting
+# this string if your java app doesn't work correctly. We may as well just lie
+# and say that we're a working one by default.
+#
+# We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
+# java that happens to be on java's whitelist.
+wmname = "LG3D"

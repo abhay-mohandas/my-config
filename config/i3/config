@@ -190,7 +190,7 @@ bindsym $mod+d mode "resize"
 
 
 #Enable gaps and border
-gaps inner 15
+gaps inner 13
 #gaps outer 2
 gaps top 25
 

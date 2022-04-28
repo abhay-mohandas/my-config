@@ -200,7 +200,8 @@ for_window [class="^.*"] border pixel 0
 
 #Custom keybindings
 
-bindsym $mod+q exec --no-startup-id systemctl suspend && i3lock -e -f -k --color=33336655 --radius=110 --ring-width=3 --inside-color=44446655 --line-color=22224455 --date-str="%d %b %Y" --time-str="%-I:%M:%S %p"
+bindsym $mod+q exec --no-startup-id i3lock -e -f -k --color=33336655 --radius=110 --ring-width=3 --inside-color=44446655 --line-color=22224455 --date-str="%d %b %Y" --time-str="%-I:%M:%S %p"
+bindsym $mod+s exec --no-startup-id systemctl suspend && i3lock -e -f -k --color=33336655 --radius=110 --ring-width=3 --inside-color=44446655 --line-color=22224455 --date-str="%d %b %Y" --time-str="%-I:%M:%S %p"
 bindsym $mod+p exec --no-startup-id xfce4-screenshooter
 bindsym ctrl+h exec --no-startup-id alacritty --command python .config/wm_config/help_menu.py
 

@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/sh
 
 #exec mpv --no-video .config/sound_effects/mixkit-magic-notification-ring-2344.wav &
 exec nitrogen --restore &

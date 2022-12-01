@@ -1,8 +1,11 @@
 #!/usr/bin/sh
 
-exec nitrogen --restore &
-exec picom &
-exec nm-applet &
-exec kdeconnect-indicator &
-exec dunst &
-exec polybar &
+exec nitrogen --restore & disown
+exec picom & disown
+exec nm-applet & disown
+exec blueman-applet & disown
+#exec kdeconnect-indicator &
+exec dunst & disown
+#exec polybar &
+exec RyzenCtrl & disown
+

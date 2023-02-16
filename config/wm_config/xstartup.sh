@@ -2,6 +2,7 @@
 
 exec nitrogen --restore & disown
 exec picom & disown
+exec xborders & disown
 exec nm-applet & disown
 exec blueman-applet & disown
 #exec kdeconnect-indicator &
